@@ -14,7 +14,8 @@ from typing import List, Dict
 app = FastAPI(title="简易留言板")
 
 templates = Jinja2Templates(directory="templates")
-DATA_FILE = "messages.json"
+DATA_FILE = os.path.join(os.path.dirname(__file__), "messages.json")
+
 
 # -------------------- 数据存取函数 --------------------
 def load_messages() -> List[Dict]:
