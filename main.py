@@ -14,7 +14,10 @@ from typing import List, Dict
 app = FastAPI(title="简易留言板")
 
 templates = Jinja2Templates(directory="templates")
-DATA_FILE = os.path.join(os.path.dirname(__file__), "messages.json")
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))  # 项目根目录
+DATA_FILE = os.path.join(BASE_DIR, "messages.json")
+
 
 
 # -------------------- 数据存取函数 --------------------
@@ -78,4 +81,4 @@ def startup_event():
 
 
 if __name__ == "__main__":
-    uvicorn.run("main:app", host="127.0.0.1", port=8000,reload=True)
+    uvicorn.run("main:app", host="0.0.0.0", port=8000)
