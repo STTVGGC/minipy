@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>简易留言板</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<div class="container">
+    <h1>📜 简易留言板</h1>
+
+    <form action="/submit" method="post">
+        <input type="text" name="name" placeholder="你的名字" required>
+        <textarea name="content" placeholder="想说点什么..." required></textarea>
+        <button type="submit">提交留言</button>
+    </form>
+
+    <div class="messages">
+        {% for msg in messages %}
+        <div class="msg">
+            <div class="meta">🗓 {{ msg.time }} | 👤 {{ msg.name }}</div>
+            <div class="content">{{ msg.content }}</div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <a class="clear" href="/clear">清空所有留言</a>
+</div>
+</body>
+</html>

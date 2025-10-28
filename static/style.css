@@ -1,0 +1,68 @@
+
+body {
+    font-family: 'Microsoft YaHei', sans-serif;
+    background-color: #f3f5f7;
+    margin: 0; padding: 0;
+}
+.container {
+    width: 600px;
+    margin: 40px auto;
+    background: #fff;
+    padding: 20px 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+h1 {
+    text-align: center;
+    color: #333;
+}
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+input, textarea {
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 14px;
+}
+button {
+    background-color: #0078d7;
+    color: white;
+    padding: 10px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+}
+button:hover {
+    background-color: #005fa3;
+}
+.messages {
+    margin-top: 20px;
+}
+.msg {
+    background: #f7f9fc;
+    border-left: 4px solid #0078d7;
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 6px;
+}
+.meta {
+    font-size: 12px;
+    color: #666;
+}
+.content {
+    margin-top: 4px;
+    font-size: 14px;
+}
+.clear {
+    display: block;
+    text-align: right;
+    color: #e74c3c;
+    text-decoration: none;
+    margin-top: 10px;
+}
+.clear:hover {
+    text-decoration: underline;
+}

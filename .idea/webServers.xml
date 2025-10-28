@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="WebServers">
+    <option name="servers">
+      <webServer id="8f0f0f6c-d09e-47e5-8dc6-39f9d7da4ccb" name="minipy" url="http://43.207.3.211:8000">
+        <fileTransfer rootFolder="/home/ubuntu/minipy" accessType="SFTP" host="43.207.3.211" port="22" sshConfigId="61f02af0-a900-48d2-a518-8424e8cfd31a" sshConfig="ubuntu@43.207.3.211:22 key" keyPair="true">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" keepAliveTimeout="0" passiveMode="true" shareSSLContext="true" />
+          </advancedOptions>
+        </fileTransfer>
+      </webServer>
+    </option>
+  </component>
+</project>
