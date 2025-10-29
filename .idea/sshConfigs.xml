@@ -2,7 +2,7 @@
 <project version="4">
   <component name="SshConfigs">
     <configs>
-      <sshConfig host="43.207.3.211" id="61f02af0-a900-48d2-a518-8424e8cfd31a" keyPath="C:\Users\25313\Desktop\minipy.ppk" port="22" nameFormat="DESCRIPTIVE" username="ubuntu" useOpenSSHConfig="true" />
+      <sshConfig host="52.196.78.16" id="61f02af0-a900-48d2-a518-8424e8cfd31a" keyPath="C:\Users\25313\Desktop\minipython.pem" port="22" nameFormat="DESCRIPTIVE" username="ubuntu" useOpenSSHConfig="true" />
     </configs>
   </component>
 </project>
