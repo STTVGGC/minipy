@@ -1,3 +1,4 @@
+import os
 import uvicorn
 from fastapi import FastAPI, Form, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
@@ -12,6 +13,14 @@ from models import Message
 # -------------------- 应用与配置 --------------------
 app = FastAPI(title="简易留言板 - 数据库版")
 templates = Jinja2Templates(directory="templates")
+
+# Read DB config from environment (default to local sqlite for easy Docker smoke-test)
+# DATABASE_URL = os.getenv("DATABASE_URL", "sqlite://db.sqlite3")
+# GENERATE_SCHEMAS = os.getenv("GENERATE_SCHEMAS", "true").lower() in ("1", "true", "yes")
+
+# 硬编码的 MySQL 连接字符串
+DATABASE_URL = "mysql://Wang:A19356756837@52.196.78.16:3306/messageboard"
+GENERATE_SCHEMAS = True
 
 
 # -------------------- 路由与逻辑 --------------------
@@ -51,11 +60,13 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 
 
 # -------------------- 数据库连接 --------------------
+print("DB_URL =", DATABASE_URL)
+
 register_tortoise(
     app,
-    db_url="mysql://Wang:A19356756837@52.196.78.16:3306/messageboard",
+    db_url=DATABASE_URL,
     modules={"models": ["models"]},
-    generate_schemas=False,  # 首次运行可改为 True 自动建表
+    generate_schemas=GENERATE_SCHEMAS,
     add_exception_handlers=True,
 )
 
@@ -63,7 +74,7 @@ register_tortoise(
 # -------------------- 启动提示 --------------------
 @app.on_event("startup")
 def startup_event():
-    print("✅ FastAPI + MySQL 留言板已启动：http://52.196.78.16:8000")
+    print("✅ FastAPI 留言板已启动 (容器内)。访问: http://0.0.0.0:8000")
 
 
 if __name__ == "__main__":

@@ -1,2 +1,27 @@
-venv/
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
 
+# Virtualenvs
+venv/
+.env
+.env.*
+
+# SQLite
+db.sqlite3
+*.sqlite3
+
+# IDE
+.idea/
+.vscode/
+
+# Docker
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Migrations and compiled files
+migrations/
