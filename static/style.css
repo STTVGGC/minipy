@@ -1,68 +1,144 @@
-
+/* ===== 基础布局 ===== */
 body {
-    font-family: 'Microsoft YaHei', sans-serif;
-    background-color: #f3f5f7;
-    margin: 0; padding: 0;
+    font-family: "Microsoft YaHei", sans-serif;
+    background: #f4f7f9;
+    color: #333;
+    margin: 0;
+    padding: 0;
 }
+
 .container {
-    width: 600px;
-    margin: 40px auto;
+    max-width: 720px;
+    margin: 50px auto;
     background: #fff;
-    padding: 20px 30px;
     border-radius: 12px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    padding: 25px 30px;
 }
+
+/* ===== 标题 ===== */
 h1 {
     text-align: center;
-    color: #333;
+    color: #0078d4;
+    margin-bottom: 25px;
 }
+
+/* ===== 表单区域 ===== */
 form {
     display: flex;
     flex-direction: column;
     gap: 10px;
+    margin-bottom: 20px;
 }
-input, textarea {
-    padding: 8px;
-    border: 1px solid #ccc;
-    border-radius: 6px;
-    font-size: 14px;
-}
-button {
-    background-color: #0078d7;
-    color: white;
+
+input[type="text"],
+textarea {
+    width: 100%;
     padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 14px;
+    resize: none;
+}
+
+button[type="submit"] {
+    background-color: #0078d4;
+    color: #fff;
     border: none;
-    border-radius: 6px;
-    cursor: pointer;
-}
-button:hover {
-    background-color: #005fa3;
-}
-.messages {
-    margin-top: 20px;
-}
-.msg {
-    background: #f7f9fc;
-    border-left: 4px solid #0078d7;
+    border-radius: 8px;
     padding: 10px;
-    margin-bottom: 10px;
-    border-radius: 6px;
+    font-size: 15px;
+    cursor: pointer;
+    transition: background 0.3s;
 }
-.meta {
-    font-size: 12px;
-    color: #666;
+
+button[type="submit"]:hover {
+    background-color: #005ea3;
 }
-.content {
-    margin-top: 4px;
+
+/* ===== 排序链接 ===== */
+.sort-links {
+    text-align: right;
+    margin-bottom: 15px;
     font-size: 14px;
 }
-.clear {
-    display: block;
-    text-align: right;
-    color: #e74c3c;
+
+.sort-links a {
+    color: #0078d4;
     text-decoration: none;
+    margin-left: 8px;
+}
+
+.sort-links a.active {
+    font-weight: bold;
+    color: #000;
+}
+
+/* ===== 留言内容区域 ===== */
+.messages {
     margin-top: 10px;
 }
+
+.msg {
+    background-color: #f9fafc;
+    border: 1px solid #e4e6eb;
+    border-radius: 8px;
+    padding: 12px;
+    margin-bottom: 12px;
+    transition: all 0.2s ease;
+}
+
+.msg:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 3px 6px rgba(0,0,0,0.05);
+}
+
+/* ===== 元信息与删除按钮 ===== */
+.meta {
+    font-size: 13px;
+    color: #666;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+}
+
+.delete-btn {
+    background-color: #ff6666;
+    border: none;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 12px;
+    transition: 0.2s;
+}
+
+.delete-btn:hover {
+    background-color: #e04040;
+}
+
+/* ===== 留言内容 ===== */
+.content {
+    font-size: 15px;
+    line-height: 1.5;
+    color: #333;
+    white-space: pre-wrap;
+}
+
+/* ===== 清空按钮 ===== */
+.clear {
+    display: block;
+    text-align: center;
+    margin-top: 20px;
+    background-color: #e0e0e0;
+    padding: 8px;
+    border-radius: 6px;
+    color: #444;
+    text-decoration: none;
+    transition: 0.2s;
+}
+
 .clear:hover {
-    text-decoration: underline;
+    background-color: #d0d0d0;
 }

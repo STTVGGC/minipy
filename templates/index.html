@@ -4,6 +4,25 @@
     <meta charset="UTF-8">
     <title>简易留言板</title>
     <link rel="stylesheet" href="/static/style.css">
+    <style>
+        .msg { border-bottom: 1px solid #ddd; padding: 8px; margin-bottom: 5px; }
+        .meta { font-size: 0.9em; color: #555; display: flex; justify-content: space-between; }
+        .delete-btn {
+            background-color: #ff6666;
+            color: white;
+            border: none;
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-size: 0.8em;
+            cursor: pointer;
+        }
+        .sort-links a {
+            margin-right: 10px;
+            text-decoration: none;
+            color: #0078d4;
+        }
+        .sort-links a.active { font-weight: bold; color: #000; }
+    </style>
 </head>
 <body>
 <div class="container">
@@ -15,10 +34,19 @@
         <button type="submit">提交留言</button>
     </form>
 
+    <div class="sort-links">
+        排序方式：
+        <a href="/?sort=desc" class="{% if sort == 'desc' %}active{% endif %}">最新优先</a>
+        <a href="/?sort=asc" class="{% if sort == 'asc' %}active{% endif %}">最早优先</a>
+    </div>
+
     <div class="messages">
         {% for msg in messages %}
         <div class="msg">
-            <div class="meta">🗓 {{ msg.time }} | 👤 {{ msg.name }}</div>
+            <div class="meta">
+                <span>🗓 {{ msg.created_at.strftime("%Y-%m-%d %H:%M:%S") }} | 👤 {{ msg.name }}</span>
+                <a href="/delete/{{ msg.id }}"><button class="delete-btn">删除</button></a>
+            </div>
             <div class="content">{{ msg.content }}</div>
         </div>
         {% endfor %}

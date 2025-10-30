@@ -4,7 +4,7 @@ from fastapi import FastAPI, Form, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 
 from tortoise.contrib.fastapi import register_tortoise
 from models import Message
@@ -14,23 +14,46 @@ from models import Message
 app = FastAPI(title="简易留言板 - 数据库版")
 templates = Jinja2Templates(directory="templates")
 
-# Read DB config from environment (default to local sqlite for easy Docker smoke-test)
-# DATABASE_URL = os.getenv("DATABASE_URL", "sqlite://db.sqlite3")
-# GENERATE_SCHEMAS = os.getenv("GENERATE_SCHEMAS", "true").lower() in ("1", "true", "yes")
-
 # 硬编码的 MySQL 连接字符串
 DATABASE_URL = "mysql://Wang:A19356756837@52.196.78.16:3306/messageboard"
 GENERATE_SCHEMAS = True
 
 
+# -------------------- 工具函数 --------------------
+def time_ago(dt: datetime) -> str:
+    """把时间转为‘几分钟前’格式"""
+    now = datetime.now(timezone.utc)  # 带时区的当前时间
+    if dt.tzinfo is None:
+        dt = dt.replace(tzinfo=timezone.utc)  # 补上时区
+    delta = now - dt
+    if delta < timedelta(minutes=1):
+        return "刚刚"
+    elif delta < timedelta(hours=1):
+        return f"{int(delta.seconds / 60)}分钟前"
+    elif delta < timedelta(days=1):
+        return f"{int(delta.seconds / 3600)}小时前"
+    elif delta < timedelta(days=7):
+        return f"{delta.days}天前"
+    else:
+        return dt.strftime("%Y-%m-%d %H:%M")
+
+
 # -------------------- 路由与逻辑 --------------------
 @app.get("/", response_class=HTMLResponse)
-async def index(request: Request):
+async def index(request: Request, sort: str = "desc"):
     """显示留言板主页"""
-    messages = await Message.all().order_by("-created_at")
+    if sort == "asc":
+        messages = await Message.all().order_by("created_at")
+    else:
+        messages = await Message.all().order_by("-created_at")
+    # 添加可读时间格式
+    for m in messages:
+        m.time_display = time_ago(m.created_at)
+
     return templates.TemplateResponse("index.html", {
         "request": request,
-        "messages": messages
+        "messages": messages,
+        "sort": sort
     })
 
 
@@ -45,6 +68,15 @@ async def submit_message(name: str = Form(...), content: str = Form(...)):
         content=content.strip(),
         created_at=datetime.now()
     )
+    return RedirectResponse("/", status_code=303)
+
+
+@app.get("/delete/{msg_id}")
+async def delete_message(msg_id: int):
+    """删除留言"""
+    msg = await Message.filter(id=msg_id).first()
+    if msg:
+        await msg.delete()
     return RedirectResponse("/", status_code=303)
 
 
