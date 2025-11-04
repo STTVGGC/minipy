@@ -3,5 +3,5 @@
   <component name="Black">
     <option name="sdkName" value="fastapi" />
   </component>
-  <component name="ProjectRootManager" version="2" project-jdk-name="fastapi" project-jdk-type="Python SDK" />
+  <component name="ProjectRootManager" version="2" project-jdk-name="fastapi-ocr" project-jdk-type="Python SDK" />
 </project>

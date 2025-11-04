@@ -44,7 +44,7 @@
         {% for msg in messages %}
         <div class="msg">
             <div class="meta">
-                <span>🗓 {{ msg.created_at.strftime("%Y-%m-%d %H:%M:%S") }} | 👤 {{ msg.name }}</span>
+                <span>🗓 {{ msg.created_at }} | 👤 {{ msg.name }}</span>
                 <a href="/delete/{{ msg.id }}"><button class="delete-btn">删除</button></a>
             </div>
             <div class="content">{{ msg.content }}</div>
