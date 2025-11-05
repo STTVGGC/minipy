@@ -5,7 +5,7 @@
     <title>简易留言板</title>
     <link rel="stylesheet" href="/static/style.css">
     <style>
-        .msg { border-bottom: 1px solid #ddd; padding: 8px; margin-bottom: 5px; }
+        .msg { border-bottom: 1px solid #ddd; padding: 8px; margin-bottom: 10px; }
         .meta { font-size: 0.9em; color: #555; display: flex; justify-content: space-between; }
         .delete-btn {
             background-color: #ff6666;
@@ -16,12 +16,114 @@
             font-size: 0.8em;
             cursor: pointer;
         }
+        .like-btn {
+            background-color: #f0f0f0;
+            border: 1px solid #ddd;
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-size: 0.8em;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            margin-right: 10px;
+        }
+        .like-btn:hover {
+            background-color: #e0e0e0;
+        }
+        .like-btn.liked {
+            background-color: #ffebee;
+            color: #e53935;
+            border-color: #ffcdd2;
+        }
+        .like-count {
+            margin-left: 4px;
+        }
+        .action-buttons {
+            display: flex;
+            gap: 5px;
+            margin-top: 8px;
+        }
+        .reply-btn {
+            background-color: #f0f0f0;
+            border: 1px solid #ddd;
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-size: 0.8em;
+            cursor: pointer;
+        }
+        .reply-btn:hover {
+            background-color: #e0e0e0;
+        }
         .sort-links a {
             margin-right: 10px;
             text-decoration: none;
             color: #0078d4;
         }
         .sort-links a.active { font-weight: bold; color: #000; }
+        .comments {
+            margin-top: 10px;
+            padding-left: 20px;
+            border-left: 3px solid #eee;
+        }
+        .comment {
+            padding: 5px 0;
+            font-size: 0.9em;
+            color: #333;
+        }
+        .comment-meta {
+            font-size: 0.8em;
+            color: #666;
+            margin-bottom: 2px;
+        }
+        .delete-comment-btn {
+            background-color: #ff9e9e;
+            color: white;
+            border: none;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.7em;
+            cursor: pointer;
+            margin-left: 5px;
+        }
+        .reply-form {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #f9f9f9;
+            border-radius: 6px;
+            display: none;
+        }
+        .reply-form input,
+        .reply-form textarea {
+            width: 100%;
+            padding: 5px;
+            margin-bottom: 5px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        .reply-form textarea {
+            height: 60px;
+            resize: vertical;
+        }
+        .reply-form button {
+            background-color: #4caf50;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .reply-form button:hover {
+            background-color: #45a049;
+        }
+        .cancel-reply {
+            background-color: #f0f0f0;
+            border: 1px solid #ddd;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-left: 5px;
+        }
     </style>
 </head>
 <body>
@@ -42,17 +144,192 @@
 
     <div class="messages">
         {% for msg in messages %}
-        <div class="msg">
+        <div class="msg" data-msg-id="{{ msg.id }}">
             <div class="meta">
                 <span>🗓 {{ msg.created_at }} | 👤 {{ msg.name }}</span>
                 <a href="/delete/{{ msg.id }}"><button class="delete-btn">删除</button></a>
             </div>
             <div class="content">{{ msg.content }}</div>
+            <div class="action-buttons">
+                <button class="like-btn" onclick="likeMessage({{ msg.id|tojson }})"><span>👍</span> <span class="like-count">{{ msg.likes }}</span></button>
+                <button class="reply-btn" onclick="toggleReplyForm({{ msg.id|tojson }})"><span>💬</span> 回复</button>
+            </div>
+            
+            <!-- 回复表单 -->
+            <div class="reply-form" id="reply-form-{{ msg.id }}">
+                <input type="text" id="reply-name-{{ msg.id }}" placeholder="你的名字" required>
+                <textarea id="reply-content-{{ msg.id }}" placeholder="写下你的回复..." required></textarea>
+                <button onclick="submitReply({{ msg.id|tojson }})">提交回复</button>
+                <button class="cancel-reply" onclick="toggleReplyForm({{ msg.id|tojson }})">取消</button>
+              </div>
+            
+            <!-- 评论区域 -->
+            <div class="comments" id="comments-{{ msg.id }}">
+                <!-- 评论将通过AJAX动态加载 -->
+                <div class="loading-comments">加载评论中...</div>
+            </div>
         </div>
         {% endfor %}
     </div>
 
     <a class="clear" href="/clear">清空所有留言</a>
 </div>
+    <script>
+        // 页面加载完成后加载所有评论
+        document.addEventListener('DOMContentLoaded', function() {
+            const messages = document.querySelectorAll('.msg');
+            messages.forEach(msg => {
+                const msgId = msg.getAttribute('data-msg-id');
+                loadComments(msgId);
+            });
+        });
+
+        // 点赞功能
+        function likeMessage(msgId) {
+            const likeBtn = document.querySelector(`.msg[data-msg-id="${msgId}"] .like-btn`);
+            const likeCount = document.querySelector(`.msg[data-msg-id="${msgId}"] .like-count`);
+            
+            // 防止重复点击
+            likeBtn.disabled = true;
+            
+            fetch(`/like/${msgId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        likeCount.textContent = data.likes;
+                        likeBtn.classList.add('liked');
+                        
+                        // 添加点赞动画效果
+                        likeBtn.style.transform = 'scale(1.1)';
+                        setTimeout(() => {
+                            likeBtn.style.transform = 'scale(1)';
+                        }, 200);
+                    }
+                    likeBtn.disabled = false;
+                })
+                .catch(error => {
+                    console.error('点赞失败:', error);
+                    likeBtn.disabled = false;
+                });
+        }
+
+        // 切换回复表单显示
+        function toggleReplyForm(msgId) {
+            const replyForm = document.getElementById(`reply-form-${msgId}`);
+            replyForm.style.display = replyForm.style.display === 'block' ? 'none' : 'block';
+        }
+
+        // 提交回复
+        function submitReply(msgId) {
+            const nameInput = document.getElementById(`reply-name-${msgId}`);
+            const contentInput = document.getElementById(`reply-content-${msgId}`);
+            const commentsContainer = document.getElementById(`comments-${msgId}`);
+            
+            const name = nameInput.value.trim();
+            const content = contentInput.value.trim();
+            
+            if (!name || !content) {
+                alert('请填写名字和回复内容');
+                return;
+            }
+            
+            const formData = new FormData();
+            formData.append('name', name);
+            formData.append('content', content);
+            
+            fetch(`/comment/${msgId}`, {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // 重置表单
+                    nameInput.value = '';
+                    contentInput.value = '';
+                    
+                    // 隐藏回复表单
+                    toggleReplyForm(msgId);
+                    
+                    // 重新加载评论列表
+                    loadComments(msgId);
+                } else {
+                    alert('提交回复失败: ' + data.error);
+                }
+            })
+            .catch(error => {
+                console.error('提交回复失败:', error);
+                alert('提交回复失败，请稍后再试');
+            });
+        }
+
+        // 加载评论列表
+        function loadComments(msgId) {
+            const commentsContainer = document.getElementById(`comments-${msgId}`);
+            
+            fetch(`/comments/${msgId}`)
+                .then(response => response.json())
+                .then(data => {
+                    // 只有在收到服务器响应后才清空并更新评论容器
+                    commentsContainer.innerHTML = '';
+                    
+                    if (data.comments && data.comments.length > 0) {
+                        data.comments.forEach(comment => {
+                            const commentEl = document.createElement('div');
+                            commentEl.className = 'comment';
+                            commentEl.innerHTML = `
+                                <div class="comment-meta">
+                                    👤 ${comment.name} | ⏰ ${comment.time_display}
+                                    <button class="delete-comment-btn" onclick="deleteComment(${comment.id}, ${msgId}, event)"><span>🗑️</span></button>
+                                </div>
+                                <div class="comment-content">${comment.content}</div>
+                            `;
+                            commentsContainer.appendChild(commentEl);
+                        });
+                    } else {
+                        commentsContainer.innerHTML = '<div class="no-comments">暂无回复，快来抢沙发吧！</div>';
+                    }
+                })
+                .catch(error => {
+                    console.error('加载评论失败:', error);
+                    commentsContainer.innerHTML = '<div class="error-comments">加载评论失败</div>';
+                });
+        }
+
+        // 删除评论
+        function deleteComment(commentId, msgId, event) {
+            // 阻止事件冒泡，避免触发父元素的事件
+            if (event) {
+                event.stopPropagation();
+                event.preventDefault();
+            }
+            
+            // 只有当用户点击确认时才执行删除操作
+            const userConfirmed = confirm('确定要删除这条回复吗？');
+            if (userConfirmed) {
+                // 显示加载状态
+                const commentsContainer = document.getElementById(`comments-${msgId}`);
+                const originalContent = commentsContainer.innerHTML; // 保存当前内容
+                
+                fetch(`/delete-comment/${commentId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // 只有在确认删除成功后才重新加载评论列表
+                            loadComments(msgId);
+                        } else {
+                            alert('删除回复失败: ' + data.error);
+                            // 删除失败时保持原有内容不变
+                        }
+                    })
+                    .catch(error => {
+                        console.error('删除回复失败:', error);
+                        alert('删除回复失败，请稍后再试');
+                        // 出错时保持原有内容不变
+                    });
+            }
+            // 如果用户取消，不执行任何操作
+        }
+    </script>
 </body>
 </html>

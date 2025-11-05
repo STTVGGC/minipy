@@ -11,7 +11,7 @@ import inspect
 
 #数据库相关
 from tortoise import Tortoise
-from models import Message
+from models import Message, Comment
 #Redis相关
 from redis.asyncio import Redis
 
@@ -192,8 +192,10 @@ async def index(request: Request, sort: str = "desc"):
                 "id": msg.id,
                 "name": msg.name,
                 "content": msg.content,
+                "likes": msg.likes,
                 "created_at": msg.created_at.strftime("%Y-%m-%d %H:%M:%S"),
                 "time_display": time_ago(msg.created_at),
+                # 评论将通过AJAX加载
             }
             for msg in db_messages
         ]
@@ -242,10 +244,74 @@ async def delete_message(msg_id: int):
     return RedirectResponse("/", status_code=303)
 
 
+@app.get("/like/{msg_id}")
+async def like_message(msg_id: int):
+    """点赞留言"""
+    msg = await Message.filter(id=msg_id).first()
+    if msg:
+        msg.likes += 1
+        await msg.save()
+        # 清除缓存，确保下次加载最新数据
+        await cache_delete(CACHE_KEY_MESSAGES)
+        return {"success": True, "likes": msg.likes}
+    return {"success": False, "error": "Message not found"}
+
+@app.post("/comment/{msg_id}")
+async def add_comment(msg_id: int, name: str = Form(...), content: str = Form(...)):
+    """添加回复"""
+    if not name.strip() or not content.strip():
+        return {"success": False, "error": "Name and content are required"}
+    
+    msg = await Message.filter(id=msg_id).first()
+    if msg:
+        comment = await Comment.create(
+            message=msg,
+            name=name.strip(),
+            content=content.strip()
+        )
+        return {
+            "success": True,
+            "comment": {
+                "id": comment.id,
+                "name": comment.name,
+                "content": comment.content,
+                "created_at": comment.created_at.strftime("%Y-%m-%d %H:%M:%S"),
+                "time_display": time_ago(comment.created_at)
+            }
+        }
+    return {"success": False, "error": "Message not found"}
+
+@app.get("/comments/{msg_id}")
+async def get_comments(msg_id: int):
+    """获取留言的回复列表"""
+    comments = await Comment.filter(message_id=msg_id).order_by("created_at").all()
+    return {
+        "comments": [
+            {
+                "id": comment.id,
+                "name": comment.name,
+                "content": comment.content,
+                "created_at": comment.created_at.strftime("%Y-%m-%d %H:%M:%S"),
+                "time_display": time_ago(comment.created_at)
+            }
+            for comment in comments
+        ]
+    }
+
+@app.get("/delete-comment/{comment_id}")
+async def delete_comment(comment_id: int):
+    """删除回复"""
+    comment = await Comment.filter(id=comment_id).first()
+    if comment:
+        await comment.delete()
+        return {"success": True}
+    return {"success": False, "error": "Comment not found"}
+
 @app.get("/clear")
 async def clear_messages():
     """清空留言"""
     await Message.all().delete()
+    await Comment.all().delete()  # 同时清空所有回复
 
     deleted = await cache_delete(CACHE_KEY_MESSAGES)  # 清除缓存
     if deleted:
