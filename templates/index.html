@@ -129,12 +129,57 @@
 <body>
 <div class="container">
     <h1>📜 简易留言板</h1>
+    
+    <div class="user-status">
+        {% if current_user %}
+            <span>欢迎，{{ current_user.username }}！</span>
+            <a href="/logout" class="logout-btn">退出登录</a>
+        {% else %}
+            <a href="/login" class="login-btn">登录</a>
+            <a href="/register" class="register-btn">注册</a>
+        {% endif %}
+    </div>
 
     <form action="/submit" method="post">
-        <input type="text" name="name" placeholder="你的名字" required>
+        {% if current_user %}
+            <input type="text" name="name" value="{{ current_user.username }}" readonly>
+        {% else %}
+            <input type="text" name="name" placeholder="你的名字" required>
+        {% endif %}
         <textarea name="content" placeholder="想说点什么..." required></textarea>
         <button type="submit">提交留言</button>
     </form>
+    
+    <style>
+        .user-status {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 15px;
+            gap: 10px;
+        }
+        .login-btn, .register-btn, .logout-btn {
+            padding: 5px 10px;
+            border-radius: 4px;
+            text-decoration: none;
+            font-size: 0.9em;
+        }
+        .login-btn {
+            background-color: #007bff;
+            color: white;
+        }
+        .register-btn {
+            background-color: #28a745;
+            color: white;
+        }
+        .logout-btn {
+            background-color: #dc3545;
+            color: white;
+        }
+        input[readonly] {
+            background-color: #f8f9fa;
+            cursor: not-allowed;
+        }
+    </style>
 
     <div class="sort-links">
         排序方式：
@@ -157,7 +202,11 @@
             
             <!-- 回复表单 -->
             <div class="reply-form" id="reply-form-{{ msg.id }}">
-                <input type="text" id="reply-name-{{ msg.id }}" placeholder="你的名字" required>
+                {% if current_user %}
+                    <input type="text" id="reply-name-{{ msg.id }}" value="{{ current_user.username }}" readonly required>
+                {% else %}
+                    <input type="text" id="reply-name-{{ msg.id }}" placeholder="你的名字" required>
+                {% endif %}
                 <textarea id="reply-content-{{ msg.id }}" placeholder="写下你的回复..." required></textarea>
                 <button onclick="submitReply({{ msg.id|tojson }})">提交回复</button>
                 <button class="cancel-reply" onclick="toggleReplyForm({{ msg.id|tojson }})">取消</button>
@@ -236,6 +285,7 @@
             const formData = new FormData();
             formData.append('name', name);
             formData.append('content', content);
+            formData.append('msg_id', msgId);
             
             fetch(`/comment/${msgId}`, {
                 method: 'POST',
