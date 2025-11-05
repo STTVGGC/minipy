@@ -94,28 +94,88 @@ uvicorn main:app --reload --host 0.0.0.0 --port 8000
 
 ---
 
-## Docker（简短）
+## Docker 部署详细说明
 
-用途：容器化使部署一致。仓库包含 `Dockerfile` 和可选的 `docker-compose.yml`（用于同时启动 MySQL 与 Web 服务）。
+本项目已配置完整的 Docker 部署环境，包括应用容器、MySQL 数据库和 Redis 缓存。
 
-快速构建运行镜像：
+### 配置文件说明
+
+1. **Dockerfile** - 定义应用容器的构建过程
+   - 基于 Python 3.11 镜像
+   - 安装必要的系统依赖和 Python 包
+   - 暴露 8000 端口
+
+2. **docker-compose.yml** - 定义多容器应用
+   - `app` - 留言板应用服务
+   - `db` - MySQL 8.0 数据库服务
+   - `redis` - Redis 7 缓存服务
+   - `web` - 额外的应用服务实例（可选）
+
+3. **.env** - 环境变量配置
+   - 数据库连接信息
+   - Redis 配置
+   - JWT 密钥和应用设置
+
+### 使用 docker-compose 启动应用
 
 ```bash
-# 在仓库根目录
-docker build -t messageboard .
-# 如果 main.py 中需要环境变量，可使用 --env-file .env
-docker run -p 8000:8000 --env-file .env messageboard
-```
+# 在仓库根目录下执行
 
-使用 docker-compose（如果你已经将代码改为从环境读取 DATABASE_URL，并在 .env 填写 MySQL URL）：
-
-```bash
+# 首次构建并启动（包含构建过程）
 docker-compose up --build
+
+# 后续启动（不需要重新构建）
+docker-compose up
+
+# 后台运行
+docker-compose up -d
 ```
 
-Docker 注意：
-- 容器中也需安装 `python-multipart`（在 `requirements.txt` 中声明）。
-- 若使用 MySQL，请确认容器与云 MySQL 的网络连通性与安全组设置。
+### 访问应用
+
+启动成功后，可以通过以下地址访问：
+- 应用首页：http://localhost:8000
+- API 文档：http://localhost:8000/docs
+
+### 环境变量说明
+
+确保 `.env` 文件包含以下必要配置：
+
+```
+# 数据库配置
+DATABASE_URL=mysql://appuser:secret@db:3306/messageboard
+GENERATE_SCHEMAS=True  # 首次启动时生成表结构
+
+# Redis 配置
+REDIS_HOST=redis
+REDIS_PORT=6379
+REDIS_DB=0
+REDIS_DECODE_RESPONSES=True
+
+# 安全配置
+SECRET_KEY=your-secret-key-for-production-change-this
+```
+
+### 注意事项
+
+1. **数据库初始化**
+   - 首次启动时，设置 `GENERATE_SCHEMAS=True` 自动创建表结构
+   - 后续启动可以设置为 `False` 提高性能
+
+2. **依赖管理**
+   - 项目依赖已包含在 `requirements.txt` 中
+   - 包括 `python-multipart` 用于表单处理
+   - Redis 客户端已添加支持缓存功能
+
+3. **生产环境建议**
+   - 更换 `SECRET_KEY` 为更复杂的随机值
+   - 调整 `ACCESS_TOKEN_EXPIRE_MINUTES` 以符合安全要求
+   - 考虑添加 HTTPS 支持
+
+4. **问题排查**
+   - 查看容器日志：`docker-compose logs -f`
+   - 检查数据库连接：确保 MySQL 服务正常运行
+   - 验证 Redis 连接：应用会在 Redis 不可用时自动降级到无缓存模式
 
 ---
 
