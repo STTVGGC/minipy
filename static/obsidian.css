@@ -1,0 +1,93 @@
+/* Obsidian-like Dark Theme for Pandoc HTML Output */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap');
+
+body {
+  background-color: #1e1e2e;
+  color: #cdd6f4;
+  font-family: "Inter", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  max-width: 900px;
+  margin: 40px auto;
+  padding: 40px 24px;
+  line-height: 1.7;
+}
+
+/* Headers */
+h1, h2, h3, h4 {
+  color: #89b4fa;
+  border-bottom: 1px solid #313244;
+  padding-bottom: 4px;
+  margin-top: 2em;
+  font-weight: 600;
+}
+
+/* Links */
+a {
+  color: #89dceb;
+  text-decoration: none;
+}
+a:hover {
+  text-decoration: underline;
+}
+
+/* Code blocks */
+pre, code {
+  font-family: "Fira Code", monospace;
+  background-color: #181825;
+  color: #f5e0dc;
+  border-radius: 8px;
+}
+
+pre {
+  padding: 12px 16px;
+  overflow-x: auto;
+  box-shadow: 0 0 10px rgba(0,0,0,0.3);
+}
+
+code {
+  padding: 2px 6px;
+}
+
+/* Blockquotes */
+blockquote {
+  border-left: 4px solid #89b4fa;
+  margin: 1.2em 0;
+  padding-left: 16px;
+  color: #a6adc8;
+  font-style: italic;
+}
+
+/* Tables */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 20px 0;
+}
+th, td {
+  border: 1px solid #313244;
+  padding: 8px 12px;
+}
+th {
+  background-color: #313244;
+  color: #f5c2e7;
+}
+
+/* Horizontal rule */
+hr {
+  border: none;
+  border-top: 1px solid #313244;
+  margin: 2em 0;
+}
+
+/* List items */
+ul, ol {
+  padding-left: 24px;
+}
+
+/* Title */
+h1:first-of-type {
+  text-align: center;
+  color: #f38ba8;
+  border: none;
+  margin-bottom: 1.5em;
+}

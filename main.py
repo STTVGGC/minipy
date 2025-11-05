@@ -490,20 +490,39 @@ async def delete_comment(comment_id: int):
 
 # -------------------- 用户认证路由 --------------------
 @app.post("/register")
-async def register(username: str = Form(...), password: str = Form(...)):
+async def register(
+    username: str = Form(...),
+    password: str = Form(...),
+    confirm_password: str = Form(...),
+    invitation_code: str = Form(...)
+):
     """用户注册"""
+    # 检查两次密码是否一致
+    if password != confirm_password:
+        return RedirectResponse(f"/register?message=两次输入的密码不一致&message_type=error", status_code=303)
+
+    # 检查密码长度
+    if len(password) < 6:
+        return RedirectResponse(f"/register?message=密码长度至少为6位&message_type=error", status_code=303)
+
     # 检查用户名是否已存在
     existing_user = await User.filter(username=username).first()
     if existing_user:
         return RedirectResponse(f"/register?message=用户名已存在，请使用其他用户名&message_type=error", status_code=303)
-    
-    # 创建新用户
+
+    # 简单的邀请码校验（当前为静态占位）。
+    # TODO: 替换为动态邀请码校验（例如数据库表或外部服务）——在此处加入检验逻辑并在通过时继续创建用户。
+    STATIC_INVITATION = "1a2s3d"
+    if invitation_code != STATIC_INVITATION:
+        return RedirectResponse(f"/register?message=邀请码无效&message_type=error", status_code=303)
+
+    # 创建新用户（不再收集邮箱，保留 models.py 中 email 字段以兼容历史数据）
     hashed_password = get_password_hash(password)
     await User.create(
         username=username,
-        password_hash=hashed_password
+        password_hash=hashed_password,
     )
-    
+
     return RedirectResponse(f"/login?message=注册成功，请登录&message_type=success", status_code=303)
 
 @app.post("/login")
