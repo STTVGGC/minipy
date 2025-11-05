@@ -83,15 +83,18 @@ templates = Jinja2Templates(directory="templates")
 
 # 硬编码的 MySQL 连接字符串
 DATABASE_URL = "mysql://Wang:A19356756837@52.196.78.16:3306/messageboard"
-GENERATE_SCHEMAS = True
+GENERATE_SCHEMAS = False  # 表已存在，设置为False避免重复创建表结构
+
+import os
+
+# Redis 配置支持从环境变量读取，适应开发和Docker环境
+REDIS_HOST = os.getenv("REDIS_HOST", "127.0.0.1")
+REDIS_PORT = int(os.getenv("REDIS_PORT", "6379"))
+REDIS_DB = int(os.getenv("REDIS_DB", "0"))
+REDIS_DECODE_RESPONSES = os.getenv("REDIS_DECODE_RESPONSES", "True").lower() == "true"
 
 # Redis 客户端会在 lifespan 中创建以避免在模块导入时触发连接错误
 redis: Optional[Redis] = None
-# 可改为通过环境变量配置
-REDIS_HOST = "127.0.0.1"
-REDIS_PORT = 6379
-REDIS_DB = 0
-REDIS_DECODE_RESPONSES = True
 CACHE_KEY_MESSAGES = "messages_cache"  # 缓存key
 CACHE_EXPIRE_SECONDS = 60  # 缓存有效期(秒)，可改
 
