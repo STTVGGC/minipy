@@ -1,4 +1,4 @@
-/* Obsidian-like Dark Theme for Pandoc HTML Output */
+/* Obsidian-like Dark Theme for Pandoc HTML Output */  
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap');
 
@@ -33,8 +33,8 @@ a:hover {
 /* Code blocks */
 pre, code {
   font-family: "Fira Code", monospace;
-  background-color: #181825;
-  color: #f5e0dc;
+  background-color: #23272F;
+  color: #ffffff; /* 将字体颜色改为白色，确保对比 */
   border-radius: 8px;
 }
 
@@ -90,4 +90,20 @@ h1:first-of-type {
   color: #f38ba8;
   border: none;
   margin-bottom: 1.5em;
+}
+
+/* 高对比度焦点样式 */
+*:focus {
+  outline: 2px solid #f5e0dc; /* 聚焦时使用亮粉色边框 */
+}
+
+/* 可访问性 - 聚焦在代码块时 */
+pre:focus, code:focus {
+  outline: 2px solid #f5e0dc;  /* 设置聚焦效果 */
+  background-color: #06287E;    /* 聚焦时的背景色 */
+}
+
+/* 强化代码区域中的文本对比度 */
+pre, code {
+  color: #ffffff; /* 确保代码字体颜色为白色 */
 }

@@ -25,7 +25,6 @@ Thumbs.db
 
 # Migrations and compiled files
 # Migrations
-# NOTE: migrations/ in this repo is tracked. Do NOT ignore it here to avoid confusion.
 
 # Pytest / typecheck / coverage
 .pytest_cache/

@@ -1,7 +1,5 @@
 # 项目报告 — 简易留言板（minipy）
 
-日期：2025-11-05
-
 ## 1 项目简介与功能概述
 
 这是一个基于 FastAPI 的服务端渲染（Jinja2）示例应用，提供一个简易的留言板功能，主要支持：
@@ -36,16 +34,11 @@
 以下列出本项目的主要实现要点、数据流与注意事项。
 
 ### 3.1 启动与生命周期（lifespan）
-
 ---
 “我们项目在启动和关闭时要处理数据库和缓存连接。
 为了避免资源没释放或启动失败，我们用 FastAPI 的 lifespan。
 它在启动时集中建立连接，在退出时统一关闭。
 这样能保证程序即使运行在容器里，也能稳定、安全地管理外部资源。”
-
----
-
----
 
 # 关于 `lifespan`
 
@@ -69,7 +62,7 @@ async def lifespan(app: FastAPI):
     # 关闭时运行
     await Tortoise.close_connections()
     await redis.close()
-
+```
 
 lifespan 启动阶
 
@@ -98,9 +91,6 @@ lifespan 关闭阶段
 2. **关闭 Redis 连接**
    尝试兼容不同版本的 Redis 库，确保连接池安全关闭。
 
-
-
-
 相比在 `import` 阶段（模块刚加载时）就创建连接
 用 lifespan 可以：
 
@@ -108,8 +98,9 @@ lifespan 关闭阶段
 * **集中管理资源**（启动时创建，退出时关闭）；
 * **容器化部署更稳定**。
 
-lifespan 代码块
 
+lifespan 代码块
+```
 ```python
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -137,8 +128,6 @@ async def lifespan(app: FastAPI):
 
 说明：该模式避免在模块导入时连接外部服务，且在 Redis 不可用时应用仍能可用（降级）。
 
-
-
 ##  3.2 密码处理与认证（Password & Authentication）
 
 **用户密码的安全存储**和**登录身份验证方式**。
@@ -147,7 +136,6 @@ async def lifespan(app: FastAPI):
 
 在我们的项目中，**不会把用户的真实密码直接保存到数据库**。
 而是用 passlib 加密保存。登录时通过加密结果验证密码是否正确。
-
 
 
 我们使用了一个加密库 **passlib**，它提供了安全的密码算法：`pbkdf2_sha256`。
@@ -277,7 +265,7 @@ async def cache_get(key: str):
 > “我们有三张主要的表：留言、评论和用户。
 > ORM 让我们用 Python 类来操作数据库，不需要手写 SQL。”
 
-（对应三张表）：
+对应的三张表：
 
 | 模型          | 作用      | 主要字段                                                   |
 | ----------- | ------- | ------------------------------------------------------ |
@@ -390,7 +378,7 @@ uvicorn main:app --reload --host 0.0.0.0 --port 8000
 > 示例：
 >
 > ```
-> DATABASE_URL=mysql://user:password@localhost:3306/messageboard（不建议直接写入真实的数据库地址）
+> DATABASE_URL=mysql://user:password@localhost:3306/messageboard
 > ```
 >
 
