@@ -24,4 +24,31 @@ db.sqlite3
 Thumbs.db
 
 # Migrations and compiled files
-migrations/
+# Migrations
+# NOTE: migrations/ in this repo is tracked. Do NOT ignore it here to avoid confusion.
+
+# Pytest / typecheck / coverage
+.pytest_cache/
+.mypy_cache/
+.coverage
+
+# Build artifacts
+build/
+dist/
+*.egg-info/
+
+# Local python version manager
+.python-version
+
+# Virtualenvs (include both common names)
+venv/
+.venv/
+
+
+.claude
+
+.github
+
+backups/
+
+scripts/

@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>留言板项目报告</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        background-color: #ffffff;
+        color: #a0a0a0;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #a0a0a0;  padding-left: 4px; }
+    div.sourceCode
+      { color: #1f1c1b; background-color: #ffffff; }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span { color: #1f1c1b; } /* Normal */
+    code span.al { color: #bf0303; background-color: #f7e6e6; font-weight: bold; } /* Alert */
+    code span.an { color: #ca60ca; } /* Annotation */
+    code span.at { color: #0057ae; } /* Attribute */
+    code span.bn { color: #b08000; } /* BaseN */
+    code span.bu { color: #644a9b; font-weight: bold; } /* BuiltIn */
+    code span.cf { color: #1f1c1b; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #924c9d; } /* Char */
+    code span.cn { color: #aa5500; } /* Constant */
+    code span.co { color: #898887; } /* Comment */
+    code span.cv { color: #0095ff; } /* CommentVar */
+    code span.do { color: #607880; } /* Documentation */
+    code span.dt { color: #0057ae; } /* DataType */
+    code span.dv { color: #b08000; } /* DecVal */
+    code span.er { color: #bf0303; text-decoration: underline; } /* Error */
+    code span.ex { color: #0095ff; font-weight: bold; } /* Extension */
+    code span.fl { color: #b08000; } /* Float */
+    code span.fu { color: #644a9b; } /* Function */
+    code span.im { color: #ff5500; } /* Import */
+    code span.in { color: #b08000; } /* Information */
+    code span.kw { color: #1f1c1b; font-weight: bold; } /* Keyword */
+    code span.op { color: #1f1c1b; } /* Operator */
+    code span.ot { color: #006e28; } /* Other */
+    code span.pp { color: #006e28; } /* Preprocessor */
+    code span.re { color: #0057ae; background-color: #e0e9f8; } /* RegionMarker */
+    code span.sc { color: #3daee9; } /* SpecialChar */
+    code span.ss { color: #ff5500; } /* SpecialString */
+    code span.st { color: #bf0303; } /* String */
+    code span.va { color: #0057ae; } /* Variable */
+    code span.vs { color: #bf0303; } /* VerbatimString */
+    code span.wa { color: #bf0303; } /* Warning */
+  </style>
+  <link rel="stylesheet" href="obsidian.css" />
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">留言板项目报告</h1>
+</header>
+<h1 id="项目报告-简易留言板minipy">项目报告 — 简易留言板（minipy）</h1>
+<p>日期：2025-11-05</p>
+<h2 id="项目简介与功能概述">1 项目简介与功能概述</h2>
+<p>这是一个基于 FastAPI
+的服务端渲染（Jinja2）示例应用，提供一个简易的留言板功能，主要支持：</p>
+<ul>
+<li>访客/用户发布留言（带内容与昵称）</li>
+<li>留言的回复（Comment）功能</li>
+<li>点赞（likes）与删除留言/回复</li>
+<li>用户注册、登录、登出（基于 JWT）</li>
+<li>可选的 Redis 缓存用于加速按最新排序的留言列表</li>
+<li>使用 Tortoise ORM 管理数据库模型，并带有 aerich 迁移支持</li>
+</ul>
+<h2 id="使用的技术栈">2 使用的技术栈</h2>
+<ul>
+<li>Python 3.11（镜像基于 python:3.11-slim）</li>
+<li>FastAPI — HTTP 框架与路由</li>
+<li>Uvicorn — ASGI 运行器</li>
+<li>Jinja2 — 后端模板（位于 <code>templates/</code>）</li>
+<li>Tortoise ORM — 异步 ORM（模型定义在 <code>models.py</code>）</li>
+<li>aerich — Tortoise 的迁移工具（配置在
+<code>pyproject.toml</code>）</li>
+<li>Redis（可选） — 缓存层（使用 redis.asyncio 客户端）</li>
+<li>MySQL（可选）/SQLite — 数据库后端（<code>tortoise_config.py</code>
+支持通过 <code>DATABASE_URL</code> 切换）</li>
+<li>passlib（pbkdf2_sha256）— 密码哈希</li>
+<li>python-jose — JWT 编码与解码</li>
+<li>其他：python-multipart、aiomysql、jinja2</li>
+</ul>
+<p>依赖清单见 <code>requirements.txt</code>。</p>
+<h2 id="核心实现逻辑">3 核心实现逻辑</h2>
+<p>以下列出本项目的主要实现要点、数据流与注意事项。</p>
+<h3 id="启动与生命周期lifespan">3.1 启动与生命周期（Lifespan）</h3>
+<p>我们的项目在启动和关闭时需要正确处理数据库和缓存连接。<br />
+为了避免资源未释放或启动失败，我们使用了 <strong>FastAPI 的
+lifespan</strong>。<br />
+它在程序启动时统一建立连接，在退出时自动关闭，保证了服务在容器化或部署环境中稳定运行。</p>
+<h4 id="什么是-lifespan">什么是 Lifespan</h4>
+<p><code>lifespan</code> 是 FastAPI 提供的生命周期钩子。<br />
+你可以把它理解为：</p>
+<blockquote>
+<p>“程序启动前做准备工作，程序退出前做清理。”</p>
+</blockquote>
+<p>我们使用 Python 的 <code>asynccontextmanager</code>
+来定义这段生命周期逻辑。</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="at">@asynccontextmanager</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="cf">async</span> <span class="kw">def</span> lifespan(app: FastAPI):</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    <span class="co"># 启动阶段</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">await</span> Tortoise.init(db_url<span class="op">=</span>DATABASE_URL, modules<span class="op">=</span>{<span class="st">&quot;models&quot;</span>: [<span class="st">&quot;models&quot;</span>]})</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> GENERATE_SCHEMAS:</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>        <span class="cf">await</span> Tortoise.generate_schemas()</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>    <span class="co"># 初始化 Redis</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">try</span>:</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>        redis <span class="op">=</span> Redis(host<span class="op">=</span>REDIS_HOST, port<span class="op">=</span>REDIS_PORT, db<span class="op">=</span>REDIS_DB, decode_responses<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>        <span class="cf">await</span> redis.ping()</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>        redis_available <span class="op">=</span> <span class="va">True</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>    <span class="cf">except</span> <span class="pp">Exception</span>:</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>        redis_available <span class="op">=</span> <span class="va">False</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>        redis <span class="op">=</span> <span class="va">None</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>    <span class="co"># 应用运行中</span></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>    <span class="cf">try</span>:</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>        <span class="cf">yield</span></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>    <span class="cf">finally</span>:</span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>        <span class="co"># 关闭数据库与缓存</span></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>        <span class="cf">await</span> Tortoise.close_connections()</span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> redis <span class="kw">is</span> <span class="kw">not</span> <span class="va">None</span>:</span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>            close_fn <span class="op">=</span> <span class="bu">getattr</span>(redis, <span class="st">&quot;close&quot;</span>, <span class="va">None</span>)</span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> inspect.isawaitable(close_fn()):</span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>                <span class="cf">await</span> close_fn()</span></code></pre></div>
+<h4 id="lifespan-的好处">Lifespan 的好处</h4>
+<p>相比在模块导入时就连接外部服务，使用 lifespan 可以：</p>
+<ul>
+<li>✅ 延迟初始化（只有程序启动时连接）<br />
+</li>
+<li>✅ 集中管理资源（启动创建、退出释放）<br />
+</li>
+<li>✅ 提升容器化稳定性与安全性</li>
+</ul>
+<h3 id="密码处理与认证password-authentication">3.2
+密码处理与认证（Password &amp; Authentication）</h3>
+<h4 id="一密码加密与验证">一、密码加密与验证</h4>
+<p>用户密码不会直接保存到数据库中，而是通过 <strong>Passlib</strong>
+库的 <code>pbkdf2_sha256</code> 算法进行哈希加密。</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> get_password_hash(password):</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    <span class="co"># 截断到72字节以兼容旧版bcrypt</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    password_bytes <span class="op">=</span> password.encode(<span class="st">&#39;utf-8&#39;</span>)[:<span class="dv">72</span>]</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    truncated <span class="op">=</span> password_bytes.decode(<span class="st">&#39;utf-8&#39;</span>, errors<span class="op">=</span><span class="st">&#39;replace&#39;</span>)</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> pwd_context.<span class="bu">hash</span>(truncated)</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> verify_password(plain_password, hashed_password):</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    password_bytes <span class="op">=</span> plain_password.encode(<span class="st">&#39;utf-8&#39;</span>)[:<span class="dv">72</span>]</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    truncated <span class="op">=</span> password_bytes.decode(<span class="st">&#39;utf-8&#39;</span>, errors<span class="op">=</span><span class="st">&#39;replace&#39;</span>)</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> pwd_context.verify(truncated, hashed_password)</span></code></pre></div>
+<blockquote>
+<p>项目中保留了截断逻辑，确保与历史哈希行为兼容，防止老用户登录失败。</p>
+</blockquote>
+<h4 id="二jwt-登录认证">二、JWT 登录认证</h4>
+<p>登录成功后，系统使用 <strong>JWT（JSON Web Token）</strong>
+生成一个访问令牌。<br />
+令牌中包含用户信息与过期时间（默认 30 分钟）。</p>
+<p>生成方式：</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>SECRET_KEY <span class="op">=</span> <span class="st">&quot;your_secret&quot;</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>ALGORITHM <span class="op">=</span> <span class="st">&quot;HS256&quot;</span></span></code></pre></div>
+<p>发给客户端时存入 Cookie：</p>
+<pre><code>access_token = Bearer &lt;token&gt;</code></pre>
+<p>Cookie 属性：</p>
+<ul>
+<li><code>httponly</code>: 防止 JS 读取（防 XSS）</li>
+<li><code>samesite=lax</code>: 防跨站攻击</li>
+</ul>
+<blockquote>
+<p>✅ “我们用 JWT 通行证识别用户身份，不保存密码，只验证令牌。”</p>
+</blockquote>
+<h3 id="缓存策略caching-strategy">3.3 缓存策略（Caching Strategy）</h3>
+<p>留言列表支持缓存，以加速加载“最新留言”时的响应速度。</p>
+<h4 id="缓存工作流程">缓存工作流程</h4>
+<ol type="1">
+<li><p>用户打开留言主页时，后台优先尝试从 Redis 获取缓存数据：</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="cf">await</span> cache_get(CACHE_KEY_MESSAGES)</span></code></pre></div>
+<ul>
+<li>命中缓存：直接返回，加载速度快；</li>
+<li>未命中：从数据库查询并写入缓存。</li>
+</ul></li>
+<li><p>当留言被新增、点赞或删除时：</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="cf">await</span> cache_delete(CACHE_KEY_MESSAGES)</span></code></pre></div>
+<p>删除旧缓存，保证页面显示最新数据。</p></li>
+<li><p>若 Redis 连接失败，则自动关闭缓存功能：</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>redis_available <span class="op">=</span> <span class="va">False</span></span></code></pre></div>
+<p>之后直接读数据库，不影响主流程。</p></li>
+</ol>
+<blockquote>
+<p>即便 Redis 崩溃，程序仍然能正常工作（降级机制）。</p>
+</blockquote>
+<h4 id="示例代码异常保护">示例代码（异常保护）</h4>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="cf">async</span> <span class="kw">def</span> cache_get(key: <span class="bu">str</span>):</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="kw">not</span> redis_available <span class="kw">or</span> redis <span class="kw">is</span> <span class="va">None</span>:</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="va">None</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">try</span>:</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="cf">await</span> redis.get(key)</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">except</span> <span class="pp">Exception</span>:</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>        redis_available <span class="op">=</span> <span class="va">False</span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="va">None</span></span></code></pre></div>
+<h3 id="数据模型database-models">3.4 数据模型（Database Models）</h3>
+<p>本项目包含三张主要数据表：留言、评论、用户。<br />
+均由 <strong>Tortoise ORM</strong> 定义在 <code>models.py</code>
+中。</p>
+<table>
+<colgroup>
+<col style="width: 26%" />
+<col style="width: 26%" />
+<col style="width: 47%" />
+</colgroup>
+<thead>
+<tr>
+<th>模型</th>
+<th>功能</th>
+<th>主要字段</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Message</strong></td>
+<td>存放留言</td>
+<td>id, name, user(FK), content, likes, created_at</td>
+</tr>
+<tr>
+<td><strong>Comment</strong></td>
+<td>存放回复</td>
+<td>id, message(FK), name, user(FK), content, created_at</td>
+</tr>
+<tr>
+<td><strong>User</strong></td>
+<td>存放用户</td>
+<td>id, username(unique), password_hash, is_active, created_at</td>
+</tr>
+</tbody>
+</table>
+<p>表名通过 <code>Meta.table</code> 显式定义（如 <code>messages</code>,
+<code>comments</code>,
+<code>users</code>），便于后期迁移或数据库兼容。</p>
+<h3 id="路由与视图main.py">3.5 路由与视图（main.py）</h3>
+<h4 id="路由功能概览">路由功能概览</h4>
+<table>
+<thead>
+<tr>
+<th>路径</th>
+<th>方法</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>/</code></td>
+<td>GET</td>
+<td>留言主页（支持排序、读取缓存）</td>
+</tr>
+<tr>
+<td><code>/submit</code></td>
+<td>POST</td>
+<td>提交留言</td>
+</tr>
+<tr>
+<td><code>/like/{msg_id}</code></td>
+<td>GET</td>
+<td>点赞留言</td>
+</tr>
+<tr>
+<td><code>/comment/{msg_id}</code></td>
+<td>POST</td>
+<td>添加回复</td>
+</tr>
+<tr>
+<td><code>/comments/{msg_id}</code></td>
+<td>GET</td>
+<td>获取某条留言的所有评论</td>
+</tr>
+<tr>
+<td><code>/register</code>, <code>/login</code>,
+<code>/logout</code></td>
+<td>POST/GET</td>
+<td>用户相关功能</td>
+</tr>
+</tbody>
+</table>
+<p>页面使用 <strong>Jinja2 模板</strong> 渲染，部分交互采用 <strong>AJAX
+异步提交</strong>。</p>
+<h4 id="提交留言示例">提交留言示例</h4>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="at">@app.post</span>(<span class="st">&quot;/submit&quot;</span>)</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="cf">async</span> <span class="kw">def</span> submit_message(request: Request, name: <span class="bu">str</span> <span class="op">=</span> Form(<span class="va">None</span>), content: <span class="bu">str</span> <span class="op">=</span> Form(...)):</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="kw">not</span> content.strip():</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> RedirectResponse(<span class="st">&quot;/&quot;</span>, status_code<span class="op">=</span><span class="dv">303</span>)</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> current_user:</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>        <span class="cf">await</span> Message.create(</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>            name<span class="op">=</span>current_user.username,</span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>            user<span class="op">=</span>current_user,</span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>            content<span class="op">=</span>content.strip(),</span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>            created_at<span class="op">=</span>datetime.now()</span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span>:</span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="kw">not</span> name.strip():</span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> RedirectResponse(<span class="st">&quot;/&quot;</span>, status_code<span class="op">=</span><span class="dv">303</span>)</span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>        <span class="cf">await</span> Message.create(</span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>            name<span class="op">=</span>name.strip(),</span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a>            content<span class="op">=</span>content.strip(),</span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a>            created_at<span class="op">=</span>datetime.now()</span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a>    <span class="cf">await</span> cache_delete(CACHE_KEY_MESSAGES)</span>
+<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> RedirectResponse(<span class="st">&quot;/&quot;</span>, status_code<span class="op">=</span><span class="dv">303</span>)</span></code></pre></div>
+<p>🗒️ 写操作后立即清除缓存，防止读取旧数据。</p>
+<h2 id="项目运行说明">4 项目运行说明</h2>
+<h3 id="本地运行powershell">4.1 本地运行（PowerShell）</h3>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode powershell"><code class="sourceCode powershell"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>python <span class="op">-</span>m venv <span class="op">.</span><span class="fu">venv</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="op">.</span>\<span class="op">.</span><span class="fu">venv</span>\Scripts\Activate<span class="op">.</span><span class="fu">ps1</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>pip install <span class="op">-</span>r requirements<span class="op">.</span><span class="fu">txt</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>uvicorn main<span class="op">:</span>app <span class="op">--</span>reload <span class="op">--</span>host <span class="dv">0.0</span><span class="op">.</span><span class="dv">0.0</span> <span class="op">--</span>port <span class="dv">8000</span></span></code></pre></div>
+<p>访问： - 首页：<a
+href="http://localhost:8000">http://localhost:8000</a> - API 文档：<a
+href="http://localhost:8000/docs">http://localhost:8000/docs</a></p>
+<blockquote>
+<p>⚠️ 请确保 <code>DATABASE_URL</code>
+在环境变量或配置文件中已正确设置。</p>
+</blockquote>
+<h3 id="docker-运行">4.2 Docker 运行</h3>
+<div class="sourceCode" id="cb11"><pre
+class="sourceCode powershell"><code class="sourceCode powershell"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>docker-compose up <span class="op">--</span>build <span class="op">-</span>d</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>docker-compose logs <span class="op">-</span>f</span></code></pre></div>
+<p><code>docker-compose.yml</code> 包含 <code>app</code>,
+<code>db</code>, <code>redis</code> 三个服务。<br />
+如需自动创建表，请在环境变量中启用：</p>
+<pre><code>GENERATE_SCHEMAS=True
+DATABASE_URL=mysql://appuser:secret@db:3306/messageboard</code></pre>
+<h2 id="结语">5 结语</h2>
+<p>本留言板项目是一个完整的异步 Web 应用示例，结合了
+<strong>FastAPI</strong> 的高性能、<strong>Tortoise ORM</strong>
+的易用性与 <strong>Redis 缓存</strong> 的高效特性。</p>
+<p><strong>项目亮点：</strong> - 模块结构清晰、代码易读； -
+具备完整的用户认证与留言逻辑； - 使用 Redis 缓存加速页面； - 支持 Docker
+一键部署。</p>
+<h3 id="项目信息">项目信息</h3>
+<ul>
+<li>已部署地址： <a href="https://wzh730903.top"
+class="uri">https://wzh730903.top</a></li>
+<li>GitHub： <a href="https://github.com/STTVGGC/minipy"
+class="uri">https://github.com/STTVGGC/minipy</a></li>
+<li>Docker Hub： sttvggc/messageboard</li>
+</ul>
+</body>
+</html>

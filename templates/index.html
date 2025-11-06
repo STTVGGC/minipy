@@ -64,6 +64,16 @@
             margin-top: 10px;
             padding-left: 20px;
             border-left: 3px solid #eee;
+            position: relative;
+            transition: max-height 0.2s ease;
+        }
+        .comments.collapsed {
+            max-height: 56px; /* approx 1 comment */
+            overflow-y: auto;
+        }
+        .comments.expanded {
+            max-height: 480px; /* approx 10 comments */
+            overflow-y: auto;
         }
         .comment {
             padding: 5px 0;
@@ -196,8 +206,8 @@
             </div>
             <div class="content">{{ msg.content }}</div>
             <div class="action-buttons">
-                <button class="like-btn" onclick="likeMessage({{ msg.id|tojson }})"><span>👍</span> <span class="like-count">{{ msg.likes }}</span></button>
-                <button class="reply-btn" onclick="toggleReplyForm({{ msg.id|tojson }})"><span>💬</span> 回复</button>
+                <button type="button" class="like-btn" data-action="like" data-msg-id="{{ msg.id }}"><span>👍</span> <span class="like-count">{{ msg.likes }}</span></button>
+                <button type="button" class="reply-btn" data-action="toggle-reply" data-msg-id="{{ msg.id }}"><span>💬</span> 回复</button>
             </div>
             
             <!-- 回复表单 -->
@@ -208,15 +218,16 @@
                     <input type="text" id="reply-name-{{ msg.id }}" placeholder="你的名字" required>
                 {% endif %}
                 <textarea id="reply-content-{{ msg.id }}" placeholder="写下你的回复..." required></textarea>
-                <button onclick="submitReply({{ msg.id|tojson }})">提交回复</button>
-                <button class="cancel-reply" onclick="toggleReplyForm({{ msg.id|tojson }})">取消</button>
+                <button type="button" data-action="submit-reply" data-msg-id="{{ msg.id }}">提交回复</button>
+                <button type="button" class="cancel-reply" data-action="toggle-reply" data-msg-id="{{ msg.id }}">取消</button>
               </div>
             
             <!-- 评论区域 -->
-            <div class="comments" id="comments-{{ msg.id }}">
+            <div class="comments collapsed" id="comments-{{ msg.id }}">
                 <!-- 评论将通过AJAX动态加载 -->
                 <div class="loading-comments">加载评论中...</div>
             </div>
+            <!-- 展开/合并按钮由 JS 动态插入 -->
         </div>
         {% endfor %}
     </div>
@@ -289,18 +300,21 @@
             
             fetch(`/comment/${msgId}`, {
                 method: 'POST',
-                body: formData
+                body: formData,
+                credentials: 'same-origin' // ensure cookie (access_token) is sent for auth
             })
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    // 重置表单
-                    nameInput.value = '';
+                    // 仅在非只读姓名输入时清空姓名（登录用户姓名为只读，保留以便下次继续使用）
+                    if (!nameInput.readOnly) {
+                        nameInput.value = '';
+                    }
                     contentInput.value = '';
-                    
+
                     // 隐藏回复表单
                     toggleReplyForm(msgId);
-                    
+
                     // 重新加载评论列表
                     loadComments(msgId);
                 } else {
@@ -322,7 +336,7 @@
                 .then(data => {
                     // 只有在收到服务器响应后才清空并更新评论容器
                     commentsContainer.innerHTML = '';
-                    
+
                     if (data.comments && data.comments.length > 0) {
                         data.comments.forEach(comment => {
                             const commentEl = document.createElement('div');
@@ -339,11 +353,47 @@
                     } else {
                         commentsContainer.innerHTML = '<div class="no-comments">暂无回复，快来抢沙发吧！</div>';
                     }
+
+                    // Ensure comments container starts collapsed and show toggle
+                    commentsContainer.classList.remove('expanded');
+                    commentsContainer.classList.add('collapsed');
+
+                    const toggleId = `toggle-comments-${msgId}`;
+                    let toggleBtn = document.getElementById(toggleId);
+                    if (!toggleBtn) {
+                        toggleBtn = document.createElement('button');
+                        toggleBtn.id = toggleId;
+                        toggleBtn.className = 'reply-btn';
+                        toggleBtn.style.marginTop = '6px';
+                        toggleBtn.addEventListener('click', function() { toggleComments(msgId); });
+                        // insert after the comments container
+                        commentsContainer.parentNode.insertBefore(toggleBtn, commentsContainer.nextSibling);
+                    }
+                    toggleBtn.textContent = `展开回复 (${data.comments ? data.comments.length : 0})`;
                 })
                 .catch(error => {
                     console.error('加载评论失败:', error);
                     commentsContainer.innerHTML = '<div class="error-comments">加载评论失败</div>';
                 });
+        }
+
+        // 切换评论容器的展开/合并状态
+        function toggleComments(msgId) {
+            const commentsContainer = document.getElementById(`comments-${msgId}`);
+            const toggleBtn = document.getElementById(`toggle-comments-${msgId}`);
+            if (!commentsContainer || !toggleBtn) return;
+
+            if (commentsContainer.classList.contains('collapsed')) {
+                commentsContainer.classList.remove('collapsed');
+                commentsContainer.classList.add('expanded');
+                toggleBtn.textContent = '合并回复';
+            } else {
+                commentsContainer.classList.remove('expanded');
+                commentsContainer.classList.add('collapsed');
+                // update count if present
+                const count = commentsContainer.querySelectorAll('.comment').length;
+                toggleBtn.textContent = `展开回复 (${count})`;
+            }
         }
 
         // 删除评论
@@ -381,5 +431,57 @@
             // 如果用户取消，不执行任何操作
         }
     </script>
+    <script>
+        // 事件委托：处理模板中使用 data-action 的按钮，避免在模板里写 inline JS
+        document.addEventListener('click', function (e) {
+            const btn = e.target.closest('[data-action]');
+            if (!btn) return;
+            const action = btn.getAttribute('data-action');
+            const msgId = btn.getAttribute('data-msg-id');
+            if (!action) return;
+
+            // 将 msgId 转为数字（如果存在）并分发到对应函数
+            const id = msgId ? Number(msgId) : null;
+            try {
+                switch (action) {
+                    case 'like':
+                        if (id !== null) likeMessage(id);
+                        break;
+                    case 'toggle-reply':
+                        if (id !== null) toggleReplyForm(id);
+                        break;
+                    case 'submit-reply':
+                        if (id !== null) submitReply(id);
+                        break;
+                    default:
+                        break;
+                }
+            } catch (err) {
+                console.error('委托处理按钮点击时出错:', err);
+            }
+        });
+    </script>
+        <!-- 悬浮的静态报告入口（右下角） -->
+        <a href="/static/report.html" target="_blank" class="report-link" aria-label="查看项目报告">📄 项目报告</a>
+        <style>
+            /* 置于右下角的圆角按钮，简洁且不影响页面布局 */
+            .report-link {
+                position: fixed;
+                right: 18px;
+                bottom: 18px;
+                background: rgba(0,0,0,0.72);
+                color: #fff;
+                padding: 10px 14px;
+                border-radius: 28px;
+                text-decoration: none;
+                box-shadow: 0 6px 14px rgba(0,0,0,0.18);
+                font-weight: 600;
+                z-index: 9999;
+                display: inline-flex;
+                align-items: center;
+                gap: 8px;
+            }
+            .report-link:hover { background: rgba(0,0,0,0.84); transform: translateY(-2px); }
+        </style>
 </body>
 </html>

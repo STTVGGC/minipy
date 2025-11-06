@@ -37,6 +37,8 @@ class User(Model):
     id = fields.IntField(pk=True)
     username = fields.CharField(max_length=50, unique=True, index=True)
     password_hash = fields.CharField(max_length=100)
+    # email 字段已弃用并将从数据库中移除（历史兼容已在迁移中处理）
+    # 如果你需要保留 email，请在恢复前不要运行迁移。
     created_at = fields.DatetimeField(auto_now_add=True)
     is_active = fields.BooleanField(default=True)
 
